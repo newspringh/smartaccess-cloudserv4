@@ -1,0 +1,53 @@
+name: Validate Infrastructure and Helm
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Check Terraform formatting
+        run: |
+          if find infra -name '*.tf' -type f | grep -q .; then
+            terraform fmt -check -recursive infra
+          else
+            echo "No Terraform files yet."
+          fi
+
+  helm:
+    name: Helm Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Validate Helm chart
+        run: |
+          if [ -f helm/smartaccess/Chart.yaml ]; then
+            helm lint helm/smartaccess
+            helm template smartaccess-dev helm/smartaccess \
+              --namespace smartaccess-dev \
+              -f helm/smartaccess/values-dev.yaml
+            helm template smartaccess helm/smartaccess \
+              --namespace smartaccess \
+              -f helm/smartaccess/values-staging.yaml
+          else
+            echo "Helm chart not created yet."
+          fi
