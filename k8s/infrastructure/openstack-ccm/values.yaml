@@ -11,3 +11,21 @@ secret:
 
 # OpenStack API configuration will be supplied by the Secret.
 # No credentials are stored in this file.
+
+# Canal manages Kubernetes pod networking.
+# Enable only OpenStack node lifecycle integration initially.
+enabledControllers:
+  - cloud-node
+  - cloud-node-lifecycle
+
+# Run the CCM on Kubernetes control-plane nodes.
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+  - key: node.cloudprovider.kubernetes.io/uninitialized
+    operator: Exists
+    effect: NoSchedule
