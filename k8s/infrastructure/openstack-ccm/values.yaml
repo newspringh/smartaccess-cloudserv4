@@ -20,7 +20,7 @@ enabledControllers:
 
 # Run the CCM on Kubernetes control-plane nodes.
 nodeSelector:
-  node-role.kubernetes.io/control-plane: ""
+  node-role.kubernetes.io/control-plane: "true"
 
 tolerations:
   - key: node-role.kubernetes.io/control-plane
