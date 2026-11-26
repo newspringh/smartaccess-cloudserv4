@@ -29,3 +29,8 @@ tolerations:
   - key: node.cloudprovider.kubernetes.io/uninitialized
     operator: Exists
     effect: NoSchedule
+
+# RKE2 does not use the default kubeadm certificate and FlexVolume paths.
+# Node lifecycle controllers do not require these host mounts.
+extraVolumes: []
+extraVolumeMounts: []
