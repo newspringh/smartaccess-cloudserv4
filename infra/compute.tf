@@ -27,7 +27,10 @@ resource "openstack_compute_instance_v2" "kubernetes_nodes" {
   key_pair    = var.ssh_key_name
   user_data   = file("${path.module}/cloud-init/base.yaml")
 
-  security_groups = [
+  security_groups = each.value.role == "control-plane" ? [
+    openstack_networking_secgroup_v2.k8s.name,
+    openstack_networking_secgroup_v2.management.name
+    ] : [
     openstack_networking_secgroup_v2.k8s.name
   ]
 

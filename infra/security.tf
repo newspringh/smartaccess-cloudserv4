@@ -1,10 +1,9 @@
-# Shared Kubernetes security group.
+# Internal Kubernetes communication between cluster nodes.
 resource "openstack_networking_secgroup_v2" "k8s" {
   name        = "smartaccess-k8s"
-  description = "SmartAccess Kubernetes node communication"
+  description = "Internal traffic between SmartAccess Kubernetes nodes"
 }
 
-# Allow internal communication between Kubernetes nodes.
 resource "openstack_networking_secgroup_rule_v2" "internal_ipv4" {
   direction         = "ingress"
   ethertype         = "IPv4"
@@ -12,7 +11,12 @@ resource "openstack_networking_secgroup_rule_v2" "internal_ipv4" {
   security_group_id = openstack_networking_secgroup_v2.k8s.id
 }
 
-# Allow SSH from approved university and VPN networks.
+# Administrative access is restricted to cp01.
+resource "openstack_networking_secgroup_v2" "management" {
+  name        = "smartaccess-management"
+  description = "Restricted SSH and Kubernetes API administration"
+}
+
 resource "openstack_networking_secgroup_rule_v2" "ssh" {
   for_each = toset(var.admin_cidrs)
 
@@ -22,10 +26,9 @@ resource "openstack_networking_secgroup_rule_v2" "ssh" {
   port_range_min    = 22
   port_range_max    = 22
   remote_ip_prefix  = each.value
-  security_group_id = openstack_networking_secgroup_v2.k8s.id
+  security_group_id = openstack_networking_secgroup_v2.management.id
 }
 
-# Allow Kubernetes API access from approved networks.
 resource "openstack_networking_secgroup_rule_v2" "kubernetes_api" {
   for_each = toset(var.admin_cidrs)
 
@@ -35,10 +38,15 @@ resource "openstack_networking_secgroup_rule_v2" "kubernetes_api" {
   port_range_min    = 6443
   port_range_max    = 6443
   remote_ip_prefix  = each.value
-  security_group_id = openstack_networking_secgroup_v2.k8s.id
+  security_group_id = openstack_networking_secgroup_v2.management.id
 }
 
 output "k8s_security_group_id" {
-  description = "Security group for RKE2 nodes."
+  description = "Internal Kubernetes security group."
   value       = openstack_networking_secgroup_v2.k8s.id
+}
+
+output "management_security_group_id" {
+  description = "Restricted administrative security group."
+  value       = openstack_networking_secgroup_v2.management.id
 }
