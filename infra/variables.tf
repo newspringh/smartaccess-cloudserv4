@@ -39,13 +39,19 @@ variable "initial_worker_count" {
   }
 }
 
-variable "admin_cidr" {
-  description = "Trusted administrative network CIDR for SSH and Kubernetes API."
-  type        = string
+variable "admin_cidrs" {
+  description = "Approved IPv4 CIDRs for university and VPN administration."
+  type        = list(string)
   nullable    = false
 
   validation {
-    condition     = can(cidrhost(var.admin_cidr, 0))
-    error_message = "admin_cidr must be a valid IPv4 or IPv6 CIDR."
+    condition = (
+      length(var.admin_cidrs) > 0 &&
+      alltrue([
+        for cidr in var.admin_cidrs :
+        can(cidrnetmask(cidr))
+      ])
+    )
+    error_message = "Provide at least one valid IPv4 administrative CIDR."
   }
 }
