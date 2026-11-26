@@ -1,0 +1,13 @@
+# SmartAccess OpenStack Cloud Controller Manager configuration.
+# OpenStack credentials are stored in a separate Kubernetes Secret.
+
+cluster:
+  name: smartaccess
+
+secret:
+  enabled: true
+  create: false
+  name: openstack-cloud-config
+
+# OpenStack API configuration will be supplied by the Secret.
+# No credentials are stored in this file.
