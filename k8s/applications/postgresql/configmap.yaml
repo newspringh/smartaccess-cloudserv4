@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+  init-databases.sh: |
+    #!/bin/sh
+    set -eu
+
+    # Read credentials from mounted Kubernetes Secret files.
+    KEYCLOAK_PASSWORD="$(cat /run/secrets/KEYCLOAK_DB_PASSWORD)"
+    MIDPOINT_PASSWORD="$(cat /run/secrets/MIDPOINT_DB_PASSWORD)"
+
+    # Create dedicated database roles with their own credentials.
+    psql -v ON_ERROR_STOP=1 \
+      --username "$POSTGRES_USER" \
+      --dbname "$POSTGRES_DB" \
+      -v keycloak_password="$KEYCLOAK_PASSWORD" \
+      -v midpoint_password="$MIDPOINT_PASSWORD" <<'SQL'
+    SELECT format('CREATE ROLE keycloak LOGIN PASSWORD %L', :'keycloak_password')
+    \gexec
+
+    SELECT format('CREATE ROLE midpoint LOGIN PASSWORD %L', :'midpoint_password')
+    \gexec
+
+    CREATE DATABASE keycloak OWNER keycloak;
+    CREATE DATABASE midpoint OWNER midpoint;
+    SQL
+
+    unset KEYCLOAK_PASSWORD MIDPOINT_PASSWORD
+kind: ConfigMap
+metadata:
+  name: smartaccess-postgresql-init
+  namespace: smartaccess-dev

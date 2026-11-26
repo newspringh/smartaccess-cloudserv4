@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: smartaccess-postgresql
+  namespace: smartaccess-dev
+  labels:
+    app.kubernetes.io/name: smartaccess-postgresql
+spec:
+  serviceName: smartaccess-postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: smartaccess-postgresql
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: smartaccess-postgresql
+    spec:
+      securityContext:
+        fsGroup: 999
+      nodeSelector:
+        kubernetes.io/hostname: smartaccess-worker01
+      containers:
+        - name: postgresql
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smartaccess-postgresql-credentials
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U postgres -d postgres
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U postgres -d postgres
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U postgres -d postgres
+            periodSeconds: 20
+            failureThreshold: 6
+          volumeMounts:
+            - name: postgresql-data
+              mountPath: /var/lib/postgresql/data
+            - name: database-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+            - name: database-credentials
+              mountPath: /run/secrets
+              readOnly: true
+      volumes:
+        - name: database-init
+          configMap:
+            name: smartaccess-postgresql-init
+            defaultMode: 0755
+        - name: database-credentials
+          secret:
+            secretName: smartaccess-postgresql-credentials
+            defaultMode: 0440
+  volumeClaimTemplates:
+    - metadata:
+        name: postgresql-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: csi-cinder-sc-retain
+        resources:
+          requests:
+            storage: 5Gi
