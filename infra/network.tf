@@ -14,9 +14,9 @@ resource "openstack_networking_network_v2" "smartaccess" {
 resource "openstack_networking_subnet_v2" "smartaccess" {
   name            = "smartaccess-subnet"
   network_id      = openstack_networking_network_v2.smartaccess.id
-  cidr            = "192.168.100.0/24"
+  cidr            = var.private_subnet_cidr
   ip_version      = 4
-  gateway_ip      = "192.168.100.1"
+  gateway_ip      = cidrhost(var.private_subnet_cidr, 1)
   enable_dhcp     = true
   dns_nameservers = ["1.1.1.1", "9.9.9.9"]
 }

@@ -55,3 +55,14 @@ variable "admin_cidrs" {
     error_message = "Provide at least one valid IPv4 administrative CIDR."
   }
 }
+
+variable "private_subnet_cidr" {
+  description = "IPv4 subnet for SmartAccess Kubernetes nodes."
+  type        = string
+  default     = "192.168.100.0/24"
+
+  validation {
+    condition     = can(cidrnetmask(var.private_subnet_cidr))
+    error_message = "A valid IPv4 CIDR is required."
+  }
+}
