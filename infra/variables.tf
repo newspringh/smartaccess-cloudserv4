@@ -38,3 +38,14 @@ variable "initial_worker_count" {
     error_message = "SmartAccess requires exactly three worker nodes."
   }
 }
+
+variable "admin_cidr" {
+  description = "Trusted administrative network CIDR for SSH and Kubernetes API."
+  type        = string
+  nullable    = false
+
+  validation {
+    condition     = can(cidrhost(var.admin_cidr, 0))
+    error_message = "admin_cidr must be a valid IPv4 or IPv6 CIDR."
+  }
+}
