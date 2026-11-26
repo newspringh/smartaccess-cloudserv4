@@ -76,7 +76,7 @@ spec:
               mountPath: /docker-entrypoint-initdb.d
               readOnly: true
             - name: database-credentials
-              mountPath: /run/secrets
+              mountPath: /etc/smartaccess-db-secrets
               readOnly: true
       volumes:
         - name: database-init

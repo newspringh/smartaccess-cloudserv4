@@ -5,8 +5,8 @@ data:
     set -eu
 
     # Read credentials from mounted Kubernetes Secret files.
-    KEYCLOAK_PASSWORD="$(cat /run/secrets/KEYCLOAK_DB_PASSWORD)"
-    MIDPOINT_PASSWORD="$(cat /run/secrets/MIDPOINT_DB_PASSWORD)"
+    KEYCLOAK_PASSWORD="$(cat /etc/smartaccess-db-secrets/KEYCLOAK_DB_PASSWORD)"
+    MIDPOINT_PASSWORD="$(cat /etc/smartaccess-db-secrets/MIDPOINT_DB_PASSWORD)"
 
     # Create dedicated database roles with their own credentials.
     psql -v ON_ERROR_STOP=1 \
