@@ -1,0 +1,2 @@
+# External OpenStack Cloud Provider for RKE2 worker nodes.
+cloud-provider-name: external

@@ -1,0 +1,3 @@
+# External OpenStack Cloud Provider for RKE2 control-plane nodes.
+disable-cloud-controller: true
+cloud-provider-name: external
