@@ -1,0 +1,45 @@
+#cloud-config
+
+# Base configuration for SmartAccess Kubernetes nodes.
+# RKE2 installation is handled in a separate bootstrap phase.
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - curl
+  - ca-certificates
+  - jq
+  - chrony
+  - open-iscsi
+  - nfs-common
+
+# Required for Kubernetes networking.
+write_files:
+  - path: /etc/modules-load.d/k8s.conf
+    permissions: '0644'
+    content: |
+      overlay
+      br_netfilter
+
+  - path: /etc/sysctl.d/99-smartaccess-k8s.conf
+    permissions: '0644'
+    content: |
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-iptables = 1
+
+runcmd:
+  # Load Kubernetes networking modules.
+  - [modprobe, overlay]
+  - [modprobe, br_netfilter]
+
+  # Apply networking parameters.
+  - [sysctl, --system]
+
+  # Enable time synchronization.
+  - [systemctl, enable, --now, chrony]
+
+  # Prepare iSCSI support for Cinder CSI.
+  - [systemctl, enable, --now, iscsid]
+
+final_message: "SmartAccess Kubernetes node preparation completed."

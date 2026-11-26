@@ -25,6 +25,7 @@ resource "openstack_compute_instance_v2" "kubernetes_nodes" {
   image_id    = var.image_id
   flavor_name = var.instance_flavor
   key_pair    = var.ssh_key_name
+  user_data   = file("${path.module}/cloud-init/base.yaml")
 
   security_groups = [
     openstack_networking_secgroup_v2.k8s.name
