@@ -1,0 +1,45 @@
+# Terraform
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/crash.log
+**/crash.*.log
+**/*.tfvars
+**/*.tfvars.json
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+
+# Credentials and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*openrc*
+clouds.yaml
+*credential*.json
+**/secrets/*.dec.yaml
+**/secrets/*.plaintext.yaml
+
+# Kubernetes credentials
+kubeconfig
+kubeconfig.*
+**/.kube/config
+
+# Local backups and caches
+archive/
+backups/
+.DS_Store
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+
+# Local environment
+.local/
+tmp/
