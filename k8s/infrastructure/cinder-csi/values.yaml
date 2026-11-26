@@ -1,0 +1,26 @@
+# SmartAccess OpenStack Cinder CSI configuration.
+# Credentials are provided through a separately managed Kubernetes Secret.
+
+clusterID: smartaccess-cloudserv4
+
+secret:
+  enabled: true
+  create: false
+  hostMount: false
+  name: cinder-csi-cloud-config
+  filename: cloud.conf
+
+csi:
+  plugin:
+    nodePlugin:
+      kubeletDir: /var/lib/kubelet
+
+storageClass:
+  enabled: true
+  delete:
+    isDefault: false
+  retain:
+    isDefault: false
+    allowVolumeExpansion: true
+    parameters:
+      type: __DEFAULT__
