@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartaccess-postgresql
+  namespace: smartaccess-dev
+  labels:
+    app.kubernetes.io/name: smartaccess-postgresql
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: smartaccess-postgresql
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
