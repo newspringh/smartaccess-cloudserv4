@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: smartaccess-midpoint-home
+  namespace: smartaccess-dev
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: csi-cinder-sc-retain
+  resources:
+    requests:
+      storage: 2Gi

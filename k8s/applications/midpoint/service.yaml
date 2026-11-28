@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartaccess-midpoint
+  namespace: smartaccess-dev
+spec:
+  type: ClusterIP
+  selector:
+    app: smartaccess-midpoint
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
