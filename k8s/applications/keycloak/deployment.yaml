@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartaccess-keycloak
+  namespace: smartaccess-dev
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: smartaccess-keycloak
+  template:
+    metadata:
+      labels:
+        app: smartaccess-keycloak
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: smartaccess-worker02
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.8.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - start-dev
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: jdbc:postgresql://smartaccess-postgresql.smartaccess-dev.svc.cluster.local:5432/keycloak
+            - name: KC_DB_USERNAME
+              value: keycloak
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smartaccess-postgresql-credentials
+                  key: KEYCLOAK_DB_PASSWORD
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: smartaccess-keycloak-admin
+                  key: KC_BOOTSTRAP_ADMIN_USERNAME
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smartaccess-keycloak-admin
+                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 36
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+            failureThreshold: 6
